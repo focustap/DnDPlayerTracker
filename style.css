@@ -368,7 +368,9 @@ h2 {
   overflow: hidden;
   border: 1px solid rgba(157, 122, 239, 0.4);
   border-radius: 8px;
-  background: #03040b;
+  background:
+    radial-gradient(circle at 50% 28%, rgba(102, 64, 183, 0.28), transparent 34rem),
+    linear-gradient(180deg, #090718, #03040b 68%, #01030a);
   box-shadow: var(--shadow);
 }
 
@@ -457,15 +459,15 @@ h2 {
 .portrait-panel img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  object-position: 50% 28%;
-  transform: scale(1.03);
+  object-fit: contain;
+  object-position: 50% 38%;
+  transform: scale(1.02);
   transition: filter 260ms ease, transform 260ms ease;
 }
 
 .arcane-shell.is-bladesinging .portrait-panel img {
   filter: saturate(1.16) brightness(1.08);
-  transform: scale(1.055);
+  transform: scale(1.035);
 }
 
 .portrait-vignette {
@@ -1003,7 +1005,7 @@ textarea:focus-visible {
   }
 
   .portrait-panel img {
-    object-position: 50% 34%;
+    object-position: 50% 42%;
   }
 
   .ability-strip,
@@ -1051,11 +1053,11 @@ textarea:focus-visible {
 
   .portrait-panel img {
     object-position: 50% 52%;
-    transform: scale(1.08);
+    transform: scale(1.01);
   }
 
   .arcane-shell.is-bladesinging .portrait-panel img {
-    transform: scale(1.1);
+    transform: scale(1.025);
   }
 
   .hp-readout {
