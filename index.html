@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Jin's single-character Bladesinger companion dashboard for D&D sessions.">
+  <title>Jin | Bladesinger Companion</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="arcane-shell" data-page="overview">
+    <aside class="sidebar">
+      <header class="identity">
+        <div class="sigil" aria-hidden="true"><span></span></div>
+        <div>
+          <h1>Jin</h1>
+          <p>Human Wizard (Bladesinger)</p>
+        </div>
+      </header>
+
+      <nav class="nav" aria-label="Character sections">
+        <button class="nav-item is-active" type="button" data-page-target="overview">
+          <span class="nav-glyph">OV</span>
+          <span>Overview</span>
+        </button>
+        <button class="nav-item" type="button" data-page-target="abilities">
+          <span class="nav-glyph">AB</span>
+          <span>Abilities</span>
+        </button>
+        <button class="nav-item" type="button" data-page-target="spells">
+          <span class="nav-glyph">SP</span>
+          <span>Spells</span>
+        </button>
+        <button class="nav-item" type="button" data-page-target="inventory">
+          <span class="nav-glyph">IN</span>
+          <span>Inventory</span>
+        </button>
+        <button class="nav-item" type="button" data-page-target="notes">
+          <span class="nav-glyph">NO</span>
+          <span>Notes</span>
+        </button>
+      </nav>
+
+      <section class="sidebar-status panel">
+        <div class="orb-mark" aria-hidden="true"></div>
+        <p><strong>Level 3</strong> Wizard</p>
+        <p>Bladesinger</p>
+        <label for="xpProgress">XP: Milestone</label>
+        <progress id="xpProgress" value="62" max="100"></progress>
+      </section>
+
+      <blockquote>
+        "Precision in mind.<br>
+        Grace in motion.<br>
+        Magic in every cut."
+      </blockquote>
+    </aside>
+
+    <main class="main">
+      <section class="page page-overview is-visible" data-page="overview" aria-labelledby="overviewTitle">
+        <div class="topbar">
+          <h2 id="overviewTitle">Overview</h2>
+          <div class="utility-actions">
+            <button class="icon-button" id="longRestButton" type="button" title="Long Rest" aria-label="Long Rest">LR</button>
+            <button class="icon-button" id="resetLayoutButton" type="button" title="Reset Local State" aria-label="Reset Local State">RS</button>
+          </div>
+        </div>
+
+        <div class="dashboard-grid">
+          <section class="panel stat-hero armor-panel">
+            <div class="panel-label">Armor Class</div>
+            <output id="armorClass" class="huge-number">13</output>
+            <p id="acFormula" class="formula">13 base</p>
+            <div class="effect-controls">
+              <button id="shieldButton" class="ghost-button" type="button">Cast Shield</button>
+            </div>
+          </section>
+
+          <section class="portrait-panel" aria-label="Jin character artwork">
+            <img src="assets/panel-background.png" alt="Jin surrounded by violet Bladesinger magic">
+            <div class="portrait-vignette"></div>
+          </section>
+
+          <section class="panel stat-hero hp-panel">
+            <div class="panel-label">Hit Points</div>
+            <div class="hp-readout">
+              <button class="step-button" id="hpMinus" type="button" aria-label="Decrease current hit points">-</button>
+              <input id="currentHp" type="number" min="0" inputmode="numeric" aria-label="Current hit points">
+              <span>/</span>
+              <output id="maxHp">20</output>
+              <button class="step-button" id="hpPlus" type="button" aria-label="Increase current hit points">+</button>
+            </div>
+            <div class="bar"><span id="hpBar"></span></div>
+            <label class="compact-field" for="tempHp">Temp HP <input id="tempHp" type="number" min="0" inputmode="numeric"></label>
+            <div class="quick-row">
+              <button data-hp-delta="-5" type="button">-5</button>
+              <button data-hp-delta="-1" type="button">-1</button>
+              <button data-hp-delta="1" type="button">+1</button>
+              <button data-hp-delta="5" type="button">+5</button>
+            </div>
+          </section>
+
+          <section class="ability-strip panel" id="abilityStrip"></section>
+
+          <section class="panel compact-card">
+            <div class="panel-label">Initiative</div>
+            <output class="large-number" id="initiative">+2</output>
+          </section>
+
+          <section class="panel compact-card">
+            <div class="panel-label">Speed</div>
+            <output class="large-number"><span id="speed">30</span><small> ft.</small></output>
+            <p id="speedFormula" class="formula">30 base</p>
+          </section>
+
+          <section class="panel saves-card">
+            <div class="panel-label">Saving Throws</div>
+            <div id="savingThrows" class="stat-list"></div>
+          </section>
+
+          <section class="panel compact-card">
+            <div class="panel-label">Proficiency Bonus</div>
+            <output class="large-number" id="proficiency">+2</output>
+          </section>
+
+          <section class="panel passive-card">
+            <div class="panel-label">Passive Scores</div>
+            <div id="passiveScores" class="stat-list"></div>
+          </section>
+
+          <section class="panel attacks-card">
+            <div class="panel-label">Attacks</div>
+            <div id="attackList"></div>
+            <div class="cantrip-row" id="quickCantrips"></div>
+          </section>
+
+          <section class="panel activity-card">
+            <div class="panel-label">Recent Activity</div>
+            <ul id="activityLog"></ul>
+          </section>
+        </div>
+      </section>
+
+      <section class="page page-abilities" data-page="abilities" aria-labelledby="abilitiesTitle">
+        <h2 id="abilitiesTitle">Abilities</h2>
+        <div class="content-grid">
+          <section class="panel wide-panel">
+            <div class="panel-label">Ability Scores</div>
+            <div class="ability-cards" id="abilityCards"></div>
+          </section>
+          <section class="panel">
+            <div class="panel-label">Saving Throws</div>
+            <div id="abilitySaves" class="stat-list"></div>
+          </section>
+          <section class="panel">
+            <div class="panel-label">Core Numbers</div>
+            <div class="stat-list" id="coreNumbers"></div>
+          </section>
+          <section class="panel">
+            <div class="panel-label">Passive Scores</div>
+            <div id="abilityPassives" class="stat-list"></div>
+          </section>
+        </div>
+      </section>
+
+      <section class="page page-spells" data-page="spells" aria-labelledby="spellsTitle">
+        <h2 id="spellsTitle">Spells</h2>
+        <div class="content-grid">
+          <section class="panel">
+            <div class="panel-label">Spellcasting</div>
+            <div class="spell-stats">
+              <strong>Spell Save DC <span id="spellDc">13</span></strong>
+              <strong>Spell Attack <span id="spellAttack">+5</span></strong>
+            </div>
+          </section>
+          <section class="panel wide-panel">
+            <div class="panel-label">Spell Slots</div>
+            <div id="slotTracker" class="slot-tracker"></div>
+            <div class="button-row">
+              <button id="restoreSlots" type="button">Restore Slots</button>
+            </div>
+          </section>
+          <section class="panel">
+            <div class="panel-label">Cantrips</div>
+            <ul id="cantripList" class="clean-list"></ul>
+          </section>
+          <section class="panel">
+            <div class="panel-label">Prepared Spells</div>
+            <ul id="preparedSpellList" class="clean-list"></ul>
+          </section>
+        </div>
+      </section>
+
+      <section class="page page-inventory" data-page="inventory" aria-labelledby="inventoryTitle">
+        <h2 id="inventoryTitle">Inventory</h2>
+        <div class="content-grid single">
+          <section class="panel wide-panel">
+            <div class="panel-label">Equipment</div>
+            <textarea id="inventoryText" spellcheck="true"></textarea>
+          </section>
+        </div>
+      </section>
+
+      <section class="page page-notes" data-page="notes" aria-labelledby="notesTitle">
+        <h2 id="notesTitle">Notes</h2>
+        <div class="content-grid single">
+          <section class="panel wide-panel">
+            <div class="panel-label">Session Notes</div>
+            <textarea id="notesText" spellcheck="true" placeholder="Campaign notes, NPC names, temporary effects, reminders..."></textarea>
+          </section>
+        </div>
+      </section>
+    </main>
+
+    <aside class="right-rail">
+      <section class="panel bladesong-panel">
+        <div class="panel-label">Bladesong</div>
+        <div class="status-line">
+          <span id="bladesongState">Inactive</span>
+          <span id="bladesongUses">2 uses</span>
+        </div>
+        <button id="bladesongToggle" class="primary-button" type="button">Activate Bladesong</button>
+        <ul class="benefits">
+          <li>+3 AC</li>
+          <li>+10 ft. walking speed</li>
+          <li>Advantage on Acrobatics checks</li>
+          <li>+3 CON saves to maintain concentration</li>
+        </ul>
+        <div class="round-counter" aria-label="Bladesong rounds remaining">
+          <svg viewBox="0 0 120 120" aria-hidden="true">
+            <circle class="track" cx="60" cy="60" r="50"></circle>
+            <circle class="progress" id="roundArc" cx="60" cy="60" r="50"></circle>
+          </svg>
+          <div>
+            <output id="roundsRemaining">--</output>
+            <span>Rounds</span>
+          </div>
+        </div>
+        <div class="button-row">
+          <button id="nextRound" type="button">Next Round</button>
+          <button id="endBladesong" type="button">End Bladesong</button>
+        </div>
+        <p class="helper">Dismiss early without an action.</p>
+      </section>
+
+      <section class="panel effects-panel">
+        <div class="panel-label">Active Effects</div>
+        <div id="activeEffects" class="effect-list"></div>
+      </section>
+    </aside>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
