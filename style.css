@@ -545,16 +545,45 @@ h2 {
   padding: 6px 8px;
 }
 
-.quick-row {
+.quick-row,
+.hp-adjust {
   margin-top: 12px;
 }
 
 .quick-row button,
+.hp-adjust button,
 .button-row button,
 .ghost-button,
 .primary-button {
   min-height: 38px;
   padding: 0 14px;
+}
+
+.hp-adjust {
+  display: grid;
+  grid-template-columns: auto minmax(62px, 1fr) auto auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.hp-adjust input {
+  width: 100%;
+  min-width: 0;
+  color: var(--text);
+  border: 1px solid rgba(168, 139, 255, 0.32);
+  border-radius: 6px;
+  background: rgba(2, 4, 12, 0.65);
+  padding: 8px 10px;
+}
+
+.danger-button {
+  border-color: rgba(255, 111, 145, 0.46);
+  background: linear-gradient(135deg, rgba(106, 24, 48, 0.8), rgba(40, 9, 22, 0.8));
+}
+
+.heal-button {
+  border-color: rgba(102, 217, 184, 0.45);
+  background: linear-gradient(135deg, rgba(28, 91, 74, 0.82), rgba(9, 42, 36, 0.82));
 }
 
 .primary-button {

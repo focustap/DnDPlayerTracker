@@ -161,6 +161,21 @@ function setTempHP(value) {
   saveAndRender();
 }
 
+function applyHPAdjustment(direction) {
+  const amount = Math.max(0, Number($("#hpAdjustAmount").value) || 0);
+  if (!amount) return;
+
+  if (direction === "damage") {
+    state.currentHP = clamp(state.currentHP - amount, 0, character.maxHP);
+    addActivity(`${amount} damage taken`);
+  } else {
+    state.currentHP = clamp(state.currentHP + amount, 0, character.maxHP);
+    addActivity(`${amount} HP healed`);
+  }
+
+  saveAndRender();
+}
+
 function activateBladesong() {
   if (state.bladesongActive || state.bladesongUses <= 0) return;
   state.bladesongActive = true;
@@ -405,10 +420,8 @@ function bindEvents() {
   $("#hpPlus").addEventListener("click", () => setCurrentHP(state.currentHP + 1));
   $("#currentHp").addEventListener("change", (event) => setCurrentHP(event.target.value, true));
   $("#tempHp").addEventListener("change", (event) => setTempHP(event.target.value));
-
-  $$("[data-hp-delta]").forEach((button) => {
-    button.addEventListener("click", () => setCurrentHP(state.currentHP + Number(button.dataset.hpDelta)));
-  });
+  $("#damageButton").addEventListener("click", () => applyHPAdjustment("damage"));
+  $("#healButton").addEventListener("click", () => applyHPAdjustment("heal"));
 
   $("#bladesongToggle").addEventListener("click", activateBladesong);
   $("#endBladesong").addEventListener("click", () => endBladesong());
