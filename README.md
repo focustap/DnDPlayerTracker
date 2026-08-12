@@ -1,7 +1,7 @@
-# Jin Bladesinger Companion
+# Jin Ardyn Arcane Trickster Companion
 
-A static GitHub Pages companion dashboard for Jin, a Level 3 Human Bladesinger Wizard.
+A static GitHub Pages companion dashboard for Jin Ardyn, a Level 3 Human Rogue (Arcane Trickster).
 
 Open `index.html` locally, or publish the repository with GitHub Pages from the `main` branch.
 
-The character configuration lives at the top of `script.js` in the `character` object. Session state is persisted in `localStorage` under `jinCompanionState.v1`.
+The character configuration lives at the top of `script.js` in the `character` object. Session state is persisted in `localStorage` under `jinArdynRogueTracker.v1`.

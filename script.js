@@ -1,82 +1,80 @@
 const character = {
-  name: "Jin",
+  name: "Jin Ardyn",
   ancestry: "Human",
-  className: "Wizard",
-  subclass: "Bladesinger",
+  className: "Rogue",
+  subclass: "Arcane Trickster",
   level: 3,
   background: "Sage",
   leveling: "Milestone",
   baseAC: 13,
-  maxHP: 20,
+  maxHP: 24,
   tempHP: 0,
   proficiencyBonus: 2,
-  initiative: 2,
+  initiative: 4,
   speed: 30,
   spellSaveDC: 13,
   spellAttackBonus: 5,
+  sneakAttack: "2d6",
   abilityScores: {
     STR: { score: 8, mod: -1 },
-    DEX: { score: 15, mod: 2 },
-    CON: { score: 14, mod: 2 },
+    DEX: { score: 15, mod: 2, primary: true },
+    CON: { score: 15, mod: 2 },
     INT: { score: 17, mod: 3, primary: true },
-    WIS: { score: 12, mod: 1 },
+    WIS: { score: 10, mod: 0 },
     CHA: { score: 8, mod: -1 }
   },
   savingThrows: {
     STR: -1,
-    DEX: 2,
+    DEX: 4,
     CON: 2,
     INT: 5,
-    WIS: 3,
+    WIS: 0,
     CHA: -1
   },
   passiveScores: {
-    "Passive Perception": 13,
-    "Passive Insight": 15,
+    "Passive Perception": 12,
+    "Passive Insight": 10,
     "Passive Investigation": 15
-  },
-  bladesong: {
-    maxUses: 2,
-    acBonus: 3,
-    speedBonus: 10,
-    durationRounds: 10,
-    concentrationSaveBonus: 3
   },
   shield: {
     acBonus: 5
   },
   attacks: [
     {
-      name: "Main Hand Scimitar",
+      name: "Scimitar",
+      bonus: 4,
+      damage: "1d6 + 2 Slashing",
+      properties: "Finesse, Light, Nick mastery"
+    },
+    {
+      name: "Second Scimitar",
       bonus: 4,
       damage: "1d6 + 2 Slashing",
       properties: "Finesse, Light, Nick"
     },
     {
-      name: "Off Hand Scimitar",
+      name: "Shortbow",
       bonus: 4,
-      damage: "1d6 + 2 Slashing",
-      properties: "Finesse, Light"
+      damage: "1d6 + 2 Piercing",
+      properties: "Ranged, Vex mastery"
     }
   ],
-  cantrips: ["Booming Blade", "Green-Flame Blade"],
-  preparedSpells: ["Shield"],
+  cantrips: ["Minor Illusion", "Green-Flame Blade", "True Strike", "Booming Blade"],
+  preparedSpells: ["Shield", "Silent Image", "Silvery Barbs"],
   spellSlots: {
-    1: 4,
-    2: 2
+    1: 2
   },
-  inventory: ["Leather Armor", "Scimitar", "Scimitar", "Spellbook", "45 GP"]
+  inventory: ["Leather Armor", "Scimitar", "Scimitar", "Shortbow", "Spellbook", "45 GP"]
 };
 
-const storageKey = "jinCompanionState.v1";
+const storageKey = "jinArdynRogueTracker.v1";
 
 const defaultState = {
   currentHP: character.maxHP,
   tempHP: character.tempHP,
-  bladesongActive: false,
-  bladesongUses: character.bladesong.maxUses,
-  bladesongRounds: 0,
   shieldActive: false,
+  sneakAttackAvailable: true,
+  cunningActionUsed: "",
   slotUsage: Object.fromEntries(Object.entries(character.spellSlots).map(([level]) => [level, 0])),
   inventory: character.inventory.join("\n"),
   notes: "",
@@ -112,10 +110,6 @@ function clamp(number, min, max) {
 function activeACModifiers() {
   const modifiers = [];
 
-  if (state.bladesongActive) {
-    modifiers.push({ label: "Bladesong", value: character.bladesong.acBonus });
-  }
-
   if (state.shieldActive) {
     modifiers.push({ label: "Shield", value: character.shield.acBonus });
   }
@@ -135,12 +129,17 @@ function acFormula() {
 }
 
 function currentSpeed() {
-  return character.speed + (state.bladesongActive ? character.bladesong.speedBonus : 0);
+  return character.speed;
 }
 
 function speedFormula() {
-  if (!state.bladesongActive) return `${character.speed} base`;
-  return `${character.speed} + ${character.bladesong.speedBonus} Bladesong`;
+  return `${character.speed} base`;
+}
+
+function slotsRemaining(level = "1") {
+  const total = character.spellSlots[level] || 0;
+  const used = state.slotUsage[level] || 0;
+  return `${total - used}/${total}`;
 }
 
 function addActivity(text) {
@@ -176,27 +175,23 @@ function applyHPAdjustment(direction) {
   saveAndRender();
 }
 
-function activateBladesong() {
-  if (state.bladesongActive || state.bladesongUses <= 0) return;
-  state.bladesongActive = true;
-  state.bladesongUses -= 1;
-  state.bladesongRounds = character.bladesong.durationRounds;
-  addActivity("Bladesong activated");
-  saveAndRender(true);
-}
-
-function endBladesong(reason = "Bladesong ended") {
-  if (!state.bladesongActive) return;
-  state.bladesongActive = false;
-  state.bladesongRounds = 0;
-  addActivity(reason);
-  saveAndRender(true);
-}
-
 function toggleShield() {
   state.shieldActive = !state.shieldActive;
   addActivity(state.shieldActive ? "Shield raised" : "Shield ended");
   saveAndRender(true);
+}
+
+function useSneakAttack() {
+  if (!state.sneakAttackAvailable) return;
+  state.sneakAttackAvailable = false;
+  addActivity("Sneak Attack used");
+  saveAndRender();
+}
+
+function setCunningAction(action) {
+  state.cunningActionUsed = state.cunningActionUsed === action ? "" : action;
+  addActivity(state.cunningActionUsed ? `${action} used` : "Cunning Action cleared");
+  saveAndRender();
 }
 
 function nextRound() {
@@ -205,36 +200,28 @@ function nextRound() {
     addActivity("Shield expired");
   }
 
-  if (state.bladesongActive) {
-    state.bladesongRounds = Math.max(0, state.bladesongRounds - 1);
-    if (state.bladesongRounds === 0) {
-      state.bladesongActive = false;
-      addActivity("Bladesong expired");
-    } else {
-      addActivity(`Round ${character.bladesong.durationRounds - state.bladesongRounds + 1}`);
-    }
-  }
-
+  state.sneakAttackAvailable = true;
+  state.cunningActionUsed = "";
+  addActivity("Turn reset");
   saveAndRender(true);
 }
 
 function longRest() {
-  const confirmed = window.confirm("Take a Long Rest? This restores HP, Bladesong uses, spell slots, and clears active effects.");
+  const confirmed = window.confirm("Take a Long Rest? This restores HP, spell slots, turn resources, and clears active effects.");
   if (!confirmed) return;
 
   state.currentHP = character.maxHP;
   state.tempHP = 0;
-  state.bladesongActive = false;
-  state.bladesongUses = character.bladesong.maxUses;
-  state.bladesongRounds = 0;
   state.shieldActive = false;
+  state.sneakAttackAvailable = true;
+  state.cunningActionUsed = "";
   state.slotUsage = { ...defaultState.slotUsage };
   addActivity("Long Rest completed");
   saveAndRender(true);
 }
 
 function resetLocalState() {
-  const confirmed = window.confirm("Reset all saved local state for Jin?");
+  const confirmed = window.confirm("Reset all saved local state for Jin Ardyn?");
   if (!confirmed) return;
   state = { ...defaultState, slotUsage: { ...defaultState.slotUsage } };
   saveAndRender(true);
@@ -247,7 +234,13 @@ function toggleSlot(level, index) {
   saveAndRender();
 }
 
-function renderAbilities(targetSelector, compact = false) {
+function restoreSlots() {
+  state.slotUsage = { ...defaultState.slotUsage };
+  addActivity("Spell slots restored");
+  saveAndRender();
+}
+
+function renderAbilities(targetSelector) {
   const target = $(targetSelector);
   target.innerHTML = Object.entries(character.abilityScores).map(([name, data]) => `
     <article class="ability-tile ${data.primary ? "is-primary" : ""}">
@@ -258,10 +251,10 @@ function renderAbilities(targetSelector, compact = false) {
   `).join("");
 }
 
-function renderStatList(selector, values, enhancedKey) {
+function renderStatList(selector, values) {
   const target = $(selector);
   target.innerHTML = Object.entries(values).map(([label, value]) => `
-    <div class="stat-row ${label === enhancedKey ? "is-enhanced" : ""}">
+    <div class="stat-row">
       <span>${label}</span>
       <strong>${typeof value === "number" ? signed(value) : value}</strong>
     </div>
@@ -283,13 +276,8 @@ function renderAttacks() {
   $("#quickCantrips").innerHTML = character.cantrips.map((spell) => `<span class="pill">${spell}</span>`).join("");
 }
 
-function renderSpellPage() {
-  $("#spellDc").textContent = character.spellSaveDC;
-  $("#spellAttack").textContent = signed(character.spellAttackBonus);
-  $("#cantripList").innerHTML = character.cantrips.map((spell) => `<li>${spell}</li>`).join("");
-  $("#preparedSpellList").innerHTML = character.preparedSpells.map((spell) => `<li>${spell}</li>`).join("");
-
-  $("#slotTracker").innerHTML = Object.entries(character.spellSlots).map(([level, total]) => {
+function slotTrackerMarkup(source) {
+  return Object.entries(character.spellSlots).map(([level, total]) => {
     const used = state.slotUsage[level] || 0;
     const buttons = Array.from({ length: total }, (_, index) => `
       <button
@@ -297,6 +285,7 @@ function renderSpellPage() {
         class="slot-button ${index < used ? "is-used" : ""}"
         data-slot-level="${level}"
         data-slot-index="${index}"
+        data-slot-source="${source}"
         aria-label="Toggle level ${level} spell slot ${index + 1}">
       </button>
     `).join("");
@@ -308,17 +297,43 @@ function renderSpellPage() {
       </div>
     `;
   }).join("");
+}
 
+function bindSlotButtons() {
   $$("[data-slot-level]").forEach((button) => {
     button.addEventListener("click", () => toggleSlot(button.dataset.slotLevel, Number(button.dataset.slotIndex)));
   });
 }
 
+function renderSpellPage() {
+  $("#spellDc").textContent = character.spellSaveDC;
+  $("#spellAttack").textContent = signed(character.spellAttackBonus);
+  $("#cantripList").innerHTML = character.cantrips.map((spell) => `<li>${spell}</li>`).join("");
+  $("#preparedSpellList").innerHTML = character.preparedSpells.map((spell) => `<li>${spell}</li>`).join("");
+  $("#slotTracker").innerHTML = slotTrackerMarkup("spells");
+  bindSlotButtons();
+}
+
+function renderRoguePanel() {
+  $("#sneakAttackDice").textContent = character.sneakAttack;
+  $("#sneakAttackState").textContent = state.sneakAttackAvailable ? "Available this turn" : "Used this turn";
+  $("#sneakAttackState").classList.toggle("is-unavailable", !state.sneakAttackAvailable);
+  $("#sneakAttackButton").disabled = !state.sneakAttackAvailable;
+  $("#sneakAttackButton").textContent = state.sneakAttackAvailable ? "Mark Sneak Attack Used" : "Sneak Attack Used";
+
+  $$("#cunningActions [data-cunning-action]").forEach((button) => {
+    button.classList.toggle("is-used", state.cunningActionUsed === button.dataset.cunningAction);
+  });
+
+  $("#railSpellDc").textContent = character.spellSaveDC;
+  $("#railSpellAttack").textContent = signed(character.spellAttackBonus);
+  $("#railSpellSlots").textContent = slotsRemaining("1").replace("/", " / ");
+  $("#railSlotTracker").innerHTML = slotTrackerMarkup("rail");
+  bindSlotButtons();
+}
+
 function renderEffects() {
   const effects = [];
-  if (state.bladesongActive) {
-    effects.push({ label: "Bladesong", detail: `${state.bladesongRounds} rounds`, action: "End", handler: () => endBladesong() });
-  }
   if (state.shieldActive) {
     effects.push({ label: "Shield", detail: "+5 AC", action: "End", handler: toggleShield });
   }
@@ -343,7 +358,7 @@ function renderActivity() {
 
 function renderCore() {
   const shell = $(".arcane-shell");
-  shell.classList.toggle("is-bladesinging", state.bladesongActive);
+  shell.classList.toggle("is-arcane-ready", state.sneakAttackAvailable);
 
   $("#armorClass").textContent = currentAC();
   $("#acFormula").textContent = acFormula();
@@ -355,39 +370,28 @@ function renderCore() {
   $("#speed").textContent = currentSpeed();
   $("#speedFormula").textContent = speedFormula();
   $("#proficiency").textContent = signed(character.proficiencyBonus);
-
-  $("#bladesongState").textContent = state.bladesongActive ? "Active" : "Inactive";
-  $("#bladesongUses").textContent = `${state.bladesongUses} ${state.bladesongUses === 1 ? "use" : "uses"}`;
-  $("#bladesongToggle").textContent = state.bladesongActive ? "Bladesong Active" : "Activate Bladesong";
-  $("#bladesongToggle").disabled = state.bladesongActive || state.bladesongUses <= 0;
-  $("#roundsRemaining").textContent = state.bladesongActive ? state.bladesongRounds : "--";
   $("#shieldButton").textContent = state.shieldActive ? "End Shield" : "Cast Shield";
+  $("#overviewSneakAttack").textContent = character.sneakAttack;
+  $("#overviewSneakState").textContent = state.sneakAttackAvailable ? "Available" : "Used this turn";
+  $("#overviewSpellSlots").textContent = slotsRemaining("1");
 
-  const circumference = 2 * Math.PI * 50;
-  const percent = state.bladesongActive ? state.bladesongRounds / character.bladesong.durationRounds : 0;
-  const arc = $("#roundArc");
-  arc.style.strokeDasharray = `${circumference}`;
-  arc.style.strokeDashoffset = `${circumference * (1 - percent)}`;
-
-  const displayedSaves = { ...character.savingThrows };
-  if (state.bladesongActive) {
-    displayedSaves.CON = `${signed(character.savingThrows.CON)} (${signed(character.savingThrows.CON + character.bladesong.concentrationSaveBonus)} concentration)`;
-  }
-
-  renderStatList("#savingThrows", displayedSaves, state.bladesongActive ? "CON" : "");
+  renderStatList("#savingThrows", character.savingThrows);
   renderStatList("#passiveScores", character.passiveScores);
-  renderStatList("#abilitySaves", displayedSaves, state.bladesongActive ? "CON" : "");
+  renderStatList("#abilitySaves", character.savingThrows);
   renderStatList("#abilityPassives", character.passiveScores);
   renderStatList("#coreNumbers", {
     Initiative: signed(character.initiative),
     "Proficiency Bonus": signed(character.proficiencyBonus),
     "Base Speed": `${character.speed} ft.`,
-    "Current Speed": `${currentSpeed()} ft.`
+    "Current Speed": `${currentSpeed()} ft.`,
+    "Sneak Attack": character.sneakAttack
   });
 
   $("#inventoryText").value = state.inventory;
   $("#notesText").value = state.notes;
 
+  renderSpellPage();
+  renderRoguePanel();
   renderEffects();
   renderActivity();
 }
@@ -423,17 +427,17 @@ function bindEvents() {
   $("#damageButton").addEventListener("click", () => applyHPAdjustment("damage"));
   $("#healButton").addEventListener("click", () => applyHPAdjustment("heal"));
 
-  $("#bladesongToggle").addEventListener("click", activateBladesong);
-  $("#endBladesong").addEventListener("click", () => endBladesong());
+  $("#sneakAttackButton").addEventListener("click", useSneakAttack);
+  $$("#cunningActions [data-cunning-action]").forEach((button) => {
+    button.addEventListener("click", () => setCunningAction(button.dataset.cunningAction));
+  });
+
   $("#nextRound").addEventListener("click", nextRound);
   $("#shieldButton").addEventListener("click", toggleShield);
   $("#longRestButton").addEventListener("click", longRest);
   $("#resetLayoutButton").addEventListener("click", resetLocalState);
-  $("#restoreSlots").addEventListener("click", () => {
-    state.slotUsage = { ...defaultState.slotUsage };
-    addActivity("Spell slots restored");
-    saveAndRender();
-  });
+  $("#restoreSlots").addEventListener("click", restoreSlots);
+  $("#restoreRailSlots").addEventListener("click", restoreSlots);
 
   $("#inventoryText").addEventListener("input", (event) => {
     state.inventory = event.target.value;
@@ -450,7 +454,6 @@ function init() {
   renderAbilities("#abilityStrip");
   renderAbilities("#abilityCards");
   renderAttacks();
-  renderSpellPage();
   bindEvents();
   renderCore();
 }

@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Jin's single-character Bladesinger companion dashboard for D&D sessions.">
-  <title>Jin | Bladesinger Companion</title>
+  <meta name="description" content="Jin Ardyn's single-character Arcane Trickster companion dashboard for D&D sessions.">
+  <title>Jin Ardyn | Arcane Trickster Companion</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -16,8 +16,8 @@
       <header class="identity">
         <div class="sigil" aria-hidden="true"><span></span></div>
         <div>
-          <h1>Jin</h1>
-          <p>Human Wizard (Bladesinger)</p>
+          <h1>Jin Ardyn</h1>
+          <p>Human Rogue (Arcane Trickster)</p>
         </div>
       </header>
 
@@ -46,16 +46,14 @@
 
       <section class="sidebar-status panel">
         <div class="orb-mark" aria-hidden="true"></div>
-        <p><strong>Level 3</strong> Wizard</p>
-        <p>Bladesinger</p>
+        <p><strong>Level 3</strong> Rogue</p>
+        <p>Arcane Trickster</p>
         <label for="xpProgress">XP: Milestone</label>
         <progress id="xpProgress" value="62" max="100"></progress>
       </section>
 
       <blockquote>
-        "Precision in mind.<br>
-        Grace in motion.<br>
-        Magic in every cut."
+        "Knowledge belongs to whoever can reach it."
       </blockquote>
     </aside>
 
@@ -71,7 +69,7 @@
 
         <section class="hero-composition" aria-label="Jin combat overview">
           <div class="portrait-panel" aria-label="Jin character artwork">
-            <img src="assets/jintransparent.png" alt="Jin surrounded by violet Bladesinger magic">
+            <img src="assets/jintransparent.png" alt="Jin Ardyn with violet arcane blades">
             <div class="portrait-vignette"></div>
           </div>
 
@@ -117,6 +115,18 @@
             <div class="panel-label">Speed</div>
             <output class="large-number"><span id="speed">30</span><small> ft.</small></output>
             <p id="speedFormula" class="formula">30 base</p>
+          </section>
+
+          <section class="panel compact-card">
+            <div class="panel-label">Sneak Attack</div>
+            <output class="large-number" id="overviewSneakAttack">2d6</output>
+            <p id="overviewSneakState" class="formula">Available</p>
+          </section>
+
+          <section class="panel compact-card">
+            <div class="panel-label">Spell Slots</div>
+            <output class="large-number" id="overviewSpellSlots">2/2</output>
+            <p class="formula">Level 1</p>
           </section>
 
           <section class="panel saves-card">
@@ -219,34 +229,41 @@
     </main>
 
     <aside class="right-rail">
-      <section class="panel bladesong-panel">
-        <div class="panel-label">Bladesong</div>
+      <section class="panel rogue-panel">
+        <div class="panel-label">Sneak Attack</div>
         <div class="status-line">
-          <span id="bladesongState">Inactive</span>
-          <span id="bladesongUses">2 uses</span>
+          <span id="sneakAttackState">Available</span>
+          <strong id="sneakAttackDice">2d6</strong>
         </div>
-        <button id="bladesongToggle" class="primary-button" type="button">Activate Bladesong</button>
+        <button id="sneakAttackButton" class="primary-button" type="button">Mark Sneak Attack Used</button>
         <ul class="benefits">
-          <li>+3 AC</li>
-          <li>+10 ft. walking speed</li>
-          <li>Advantage on Acrobatics checks</li>
-          <li>+3 CON saves to maintain concentration</li>
+          <li>Once per turn</li>
+          <li>Requires a Finesse or Ranged weapon</li>
+          <li>Works with Advantage, or when an ally is within 5 ft. and you do not have Disadvantage</li>
         </ul>
-        <div class="round-counter" aria-label="Bladesong rounds remaining">
-          <svg viewBox="0 0 120 120" aria-hidden="true">
-            <circle class="track" cx="60" cy="60" r="50"></circle>
-            <circle class="progress" id="roundArc" cx="60" cy="60" r="50"></circle>
-          </svg>
-          <div>
-            <output id="roundsRemaining">--</output>
-            <span>Rounds</span>
-          </div>
+
+        <div class="panel-divider"></div>
+        <div class="panel-label">Cunning Action</div>
+        <div class="action-grid" id="cunningActions">
+          <button type="button" data-cunning-action="Dash">Dash</button>
+          <button type="button" data-cunning-action="Disengage">Disengage</button>
+          <button type="button" data-cunning-action="Hide">Hide</button>
         </div>
+
+        <div class="panel-divider"></div>
+        <div class="panel-label">Arcane Trickster</div>
+        <div class="stat-list trickster-stats">
+          <div class="stat-row"><span>Spell Save DC</span><strong id="railSpellDc">13</strong></div>
+          <div class="stat-row"><span>Spell Attack</span><strong id="railSpellAttack">+5</strong></div>
+          <div class="stat-row"><span>Level 1 Spell Slots</span><strong id="railSpellSlots">2 / 2</strong></div>
+        </div>
+        <div id="railSlotTracker" class="slot-tracker rail-slots"></div>
+
         <div class="button-row">
           <button id="nextRound" type="button">Next Round</button>
-          <button id="endBladesong" type="button">End Bladesong</button>
+          <button id="restoreRailSlots" type="button">Restore Slots</button>
         </div>
-        <p class="helper">Dismiss early without an action.</p>
+        <p class="helper">Next Round resets Sneak Attack and Cunning Action.</p>
       </section>
 
       <section class="panel effects-panel">
